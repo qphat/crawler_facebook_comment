@@ -1,5 +1,6 @@
 import time
 
+from dotenv import load_dotenv
 from selenium.common import TimeoutException
 from selenium.webdriver.chrome.options import Options
 import os
@@ -149,9 +150,10 @@ def get_facebook_comments(driver, url, csv_file_path):
     driver.quit()
 
 
-cookie = 'sb=C991Zb5UIzEpOddPjPpKd-af; datr=C991Za2jobTrFC88gIVKkCRj; c_user=100013530137499; ps_n=0; ps_l=0; dpr=1.5; usida=eyJ2ZXIiOjEsImlkIjoiQXNhcGNjNDFobmJuem0iLCJ0aW1lIjoxNzExMDMyMTc3fQ%3D%3D; xs=39%3ABOU-pBEscPeWEQ%3A2%3A1702224004%3A-1%3A6173%3A%3AAcVtDr9tE8Wgwxw-56SEYVics5ZsAIRWcvZy-ceNWbU9; fr=1GyUqFkj8pJcBMIhW.AWUCf5WXdmuz9fz0XE-RnsR0IqM.Bl_FLC..AAA.0.0.Bl_FLC.AWUUeTJfwbA; wd=461x585; presence=C%7B%22t3%22%3A%5B%5D%2C%22utc3%22%3A1711037395264%2C%22v%22%3A1%7D'
+load_dotenv()
+cookie = os.getenv("FACEBOOK_COOKIE")
 driver = initDriver()
 
 # for postId in readData('posts.csv'):
 #     getAmountOfComments(driver, postId, 1000)
-get_facebook_comments(driver, "https://www.facebook.com/reel/1125801148600182", "comments.csv")
+get_facebook_comments(driver, "https://www.facebook.com/reel/1125801148600182", "data/comments.csv")
