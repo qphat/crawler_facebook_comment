@@ -82,6 +82,17 @@ def loginFacebookByCookie(driver, cookie):
         print("loi login")
 
 
+def login_by_cookie(driver, cookie):
+    try:
+        driver.get('https://mbasic.facebook.com/')
+        time.sleep(2)
+        loginFacebookByCookie(driver, cookie)
+
+        return True
+    except:
+        print("check live fail")
+
+
 def get_facebook_comments(driver, url, csv_file_path):
     driver.get(url)
 
@@ -96,8 +107,8 @@ def get_facebook_comments(driver, url, csv_file_path):
     # Chờ nút lựa chọn hiển thị tất cả bình luận xuất hiện và click vào
     WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "(//div[@role='menuitem'])[3]"))).click()
 
-    # Chờ đợi và click vào nút "Xem thêm bình luận" khoảng 3 lần
-    for _ in range(3):
+    # Chờ đợi và click vào nút "Xem thêm bình luận" khoảng 50 lần
+    for _ in range(50):
         try:
             # Tìm thẻ span chứa text "Xem thêm bình luận"
             show_more_comments_span = WebDriverWait(driver, 10).until(
@@ -114,7 +125,7 @@ def get_facebook_comments(driver, url, csv_file_path):
 
     # Cập nhật lại comments_container sau khi đã hiển thị thêm bình luận
     comments_container = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "(//div[@class='x1pi30zi x1swvt13'])[1]")))
+        EC.presence_of_element_located((By.XPATH, "(//div[@class='x78zum5 xdt5ytf x6ikm8r x1odjw0f x1iyjqo2 x1pi30zi x1swvt13'])[1]")))
 
     comments = driver.execute_script("""
         function getTextFromNode(node) {
@@ -131,6 +142,7 @@ def get_facebook_comments(driver, url, csv_file_path):
             }
             return text;
         }
+        const commentNodes = arguments[0].childNodes;
         const comments = [];
         Array.from(commentNodes).forEach(node => {
             const commentText = getTextFromNode(node);
@@ -143,7 +155,7 @@ def get_facebook_comments(driver, url, csv_file_path):
 
     with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        for comment in comments[:-2]:
+        for comment in comments:
             writer.writerow([comment])
 
     driver.quit()
@@ -153,6 +165,6 @@ load_dotenv()
 cookie = os.getenv("FACEBOOK_COOKIE")
 driver = initDriver()
 
-# for postId in readData('posts.csv'):
-#     getAmountOfComments(driver, postId, 1000)
-get_facebook_comments(driver, "https://www.facebook.com/reel/1125801148600182", "data/comments.csv")
+is_live = login_by_cookie(driver, cookie)
+if is_live:
+    get_facebook_comments(driver, "https://fb.watch/qZbIHmu3Vn/", "data/qZbIHmu3Vn.csv")
