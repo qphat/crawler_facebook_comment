@@ -43,7 +43,7 @@ def initDriver():
     chrome_options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
     chrome_options.add_argument('disable-infobars')
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     return driver
 
 
@@ -96,19 +96,19 @@ def login_by_cookie(driver, cookie):
 def get_facebook_comments(driver, url, csv_file_path):
     driver.get(url)
 
-    # Click vào nút bình luận
-    WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, "(//div[@aria-label='Bình luận'])[1]"))).click()
-
-    # Chờ nút "Phù hợp nhất" xuất hiện và click vào
-    WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, "(//span[contains(text(),'Phù hợp nhất')])[1]"))).click()
+    # # Click vào nút bình luận
+    # WebDriverWait(driver, 10).until(
+    #     EC.element_to_be_clickable((By.XPATH, ""))).click()
+    #
+    # # Chờ nút "Phù hợp nhất" xuất hiện và click vào
+    # WebDriverWait(driver, 10).until(
+    #     EC.element_to_be_clickable((By.XPATH, "(//span[contains(text(),'Phù hợp nhất')])[1]"))).click()
 
     # Chờ nút lựa chọn hiển thị tất cả bình luận xuất hiện và click vào
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "(//div[@role='menuitem'])[3]"))).click()
+    # WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "(//div[@role='menuitem'])[3]"))).click()
 
     # Chờ đợi và click vào nút "Xem thêm bình luận" khoảng 50 lần
-    for _ in range(50):
+    for i in range(100):
         try:
             # Tìm thẻ span chứa text "Xem thêm bình luận"
             show_more_comments_span = WebDriverWait(driver, 10).until(
@@ -118,14 +118,16 @@ def get_facebook_comments(driver, url, csv_file_path):
             driver.execute_script('arguments[0].click();', show_more_comments_span)
 
             # Đợi một chút để bình luận mới được tải xong
+            print(f'Have shown more comments {i + 1} times')
             time.sleep(2)
         except TimeoutException:
             print("Không tìm thấy nút 'Xem thêm bình luận' hoặc đã đạt tới số lượng bình luận tối đa.")
             break
 
     # Cập nhật lại comments_container sau khi đã hiển thị thêm bình luận
+    x_path = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[2]/div/div/div/div[1]/div/div/div[2]/div[3]/div[1]/div[2]"
     comments_container = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.XPATH, "(//div[@class='x78zum5 xdt5ytf x6ikm8r x1odjw0f x1iyjqo2 x1pi30zi x1swvt13'])[1]")))
+        EC.presence_of_element_located((By.XPATH, x_path)))
 
     comments = driver.execute_script("""
         function getTextFromNode(node) {
@@ -167,4 +169,4 @@ driver = initDriver()
 
 is_live = login_by_cookie(driver, cookie)
 if is_live:
-    get_facebook_comments(driver, "https://fb.watch/qZbIHmu3Vn/", "data/qZbIHmu3Vn.csv")
+    get_facebook_comments(driver, "https://www.facebook.com/watch/?v=1275155160285835", "data/1275155160285835.csv")
