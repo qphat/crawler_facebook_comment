@@ -1,10 +1,8 @@
 import time
 from selenium.common import TimeoutException
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import csv
 
 
 class FacebookClient:
@@ -54,7 +52,7 @@ class FacebookClient:
         except:
             print("check live fail")
 
-    def crawl_comments(self, url, csv_file_path):
+    def crawl_comments(self, url):
         self.driver.get(url)
 
         # # Click vào nút bình luận
@@ -115,8 +113,4 @@ class FacebookClient:
 
             return comments;
         """, comments_container)
-
-        with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            for comment in comments:
-                writer.writerow([comment])
+        return comments
