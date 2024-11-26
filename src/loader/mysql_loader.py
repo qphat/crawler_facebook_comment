@@ -22,7 +22,7 @@ class MySQLLoader:
         create_table_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
             {schema}
-        );
+        ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         """
 
         with connection.begin() as conn:
@@ -32,21 +32,38 @@ class MySQLLoader:
 
     def load_to_mysql(self, data, table_name):
         """
-        Load cleaned data into a MySQL table.
+        Load cleaned data into a MySQL table with UTF-8 encoding.
         Args:
             data (list): List of dictionaries containing cleaned data.
             table_name (str): Target table name in the database.
         """
         mysql_hook = MySqlHook(mysql_conn_id=self.conn_id)
         connection = mysql_hook.get_sqlalchemy_engine()
+        with connection.begin() as conn:
+            # Đảm bảo rằng kết nối sử dụng utf8mb4
+            conn.execute("SET NAMES 'utf8mb4';")
 
-        # Insert data into the database
+        # Ensure the table exists and has UTF-8 encoding
+        self.create_table_if_not_exists(
+            table_name,
+            "comment TEXT CHARACTER SET utf8mb4, label VARCHAR(255) CHARACTER SET utf8mb4"
+        )
+
+        # Prepare data for MySQLdb (list of tuples)
+        values = [(item['comment'], item['label']) for item in data]  # Convert list of dicts to list of tuples
+
+        # Insert data into the database with proper encoding
         with connection.begin() as conn:
             conn.execute(
                 f"""
-                INSERT INTO {table_name} (comment)
-                VALUES (:comment)
+                SET NAMES 'utf8mb4';  -- Ensure that the connection uses utf8mb4 encoding
+                INSERT INTO {table_name} (comment, label)
+                VALUES (%s, %s)
                 """,
-                data
+                values
             )
+
         print(f"Successfully loaded data into table: {table_name}")
+
+
+

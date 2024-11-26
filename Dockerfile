@@ -16,3 +16,4 @@ ENV PYTHONPATH="/opt/airflow/src:/opt/airflow/plugins:${PYTHONPATH}"
 COPY ./src /opt/airflow/src
 COPY ./dags /opt/airflow/dags
 COPY ./plugins /opt/airflow/plugins
+COPY ./data/comments.csv /opt/airflow/data/comments.csv
