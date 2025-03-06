@@ -1,38 +1,56 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 import os
+
 
 class DriverManager:
     @staticmethod
     def init_driver():
-        WINDOW_SIZE = "1000,2000"
-        chrome_options = Options()
-        # chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('disable-infobars')
-        chrome_options.add_argument('--disable-gpu') if os.name == 'nt' else None  # Windows workaround
-        chrome_options.add_argument("--verbose")
-        chrome_options.add_argument("--no-default-browser-check")
-        chrome_options.add_argument("--ignore-ssl-errors")
-        chrome_options.add_argument("--allow-running-insecure-content")
-        chrome_options.add_argument("--disable-web-security")
-        chrome_options.add_argument("--disable-feature=IsolateOrigins,site-per-process")
-        chrome_options.add_argument("--no-first-run")
-        chrome_options.add_argument("--disable-notifications")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-translate")
-        chrome_options.add_argument("--ignore-certificate-error-spki-list")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--disable-blink-features=AutomationControllered")
-        chrome_options.add_experimental_option('useAutomationExtension', False)
-        prefs = {"profile.default_content_setting_values.notifications": 2}
-        chrome_options.add_experimental_option("prefs", prefs)
-        chrome_options.add_argument("--start-maximized")  # open Browser in maximized mode
-        chrome_options.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
-        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        chrome_options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
-        chrome_options.add_argument('disable-infobars')
+        # Giả lập trình duyệt Mobile để truy cập mbasic.facebook.com
+        MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Mobile Safari/537.36"
 
-        driver = webdriver.Chrome(options=chrome_options)
+        # Tạo Chrome Options
+        chrome_options = Options()
+
+        # Cấu hình cửa sổ trình duyệt
+        WINDOW_SIZE = "480,800"  # Kích thước mobile
+        chrome_options.add_argument(f"--window-size={WINDOW_SIZE}")
+
+        # Thêm User-Agent để Facebook nhận diện là Mobile
+        chrome_options.add_argument(f"user-agent={MOBILE_USER_AGENT}")
+
+        # Các tùy chọn để Selenium chạy mượt hơn
+        chrome_options_args = [
+            '--no-sandbox',
+            '--disable-infobars',
+            '--disable-dev-shm-usage',
+            '--disable-notifications',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-popup-blocking',
+            '--disable-gpu' if os.name == 'nt' else '',  # Chỉ tắt GPU trên Windows
+        ]
+
+        # Thêm các tùy chọn vào Chrome
+        for arg in chrome_options_args:
+            if arg:
+                chrome_options.add_argument(arg)
+
+        # Tắt Automation Extension để Selenium giống người dùng hơn
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+
+        # Giảm tải hình ảnh và script để load nhanh hơn
+        prefs = {
+            "profile.default_content_setting_values.notifications": 2,  # Tắt thông báo
+            "profile.managed_default_content_settings.images": 2,  # Không tải ảnh
+            "profile.managed_default_content_settings.javascript": 1,  # Vẫn chạy JS
+        }
+        chrome_options.add_experimental_option("prefs", prefs)
+
+        # Khởi tạo WebDriver
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+
         return driver

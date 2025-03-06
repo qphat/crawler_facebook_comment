@@ -56,3 +56,7 @@ class DataCleaner:
         Trả về DataFrame đã làm sạch.
         """
         return self.dataframe
+
+
+def apply_cleaning():
+    return None
